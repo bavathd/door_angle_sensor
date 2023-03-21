@@ -52,6 +52,8 @@ SCD30 airSensor;
 int co2 = 0;
 float t = 0;
 float h = 0;
+float magini = 0;
+float heading_in_degree = 0;
 
 int count = 0;
 
@@ -167,7 +169,7 @@ logSDCard();
 
 void logSDCard() 
 {
-dataMessage =  timeStamp  +  String(anglex)+  ","  + String(angley)+  ","  +String(anglez)+  "\r\n";
+dataMessage =  timeStamp  +   ","  +String(heading_in_degree) + "\r\n";
 Serial.print("Save data: ");
 Serial.println(dataMessage);
 appendFile(SD, "/data.txt", dataMessage.c_str());
@@ -643,10 +645,11 @@ delay(2000);
 
   /* Get a new sensor event */
   bmx160.getAllData(&Omagn, &Ogyro, &Oaccel);
-
-  initX = atan(Oaccel.x/sqrt(sq(Oaccel.y)+sq(Oaccel.z))); //init angle x 
-  initY = atan(Oaccel.y/sqrt(sq(Oaccel.x)+sq(Oaccel.z))); //init angle y
-  initZ = atan(sqrt(sq(Oaccel.x)+sq(Oaccel.y))/Oaccel.z); //init angle z 
+ 
+  magini = 180*atan2(Omagn.y,Omagn.x)/PI;
+   if( magini < 0) {
+    magini = 360+magini;
+  }
 
 delay(2000);
 digitalWrite(33, LOW);
@@ -696,18 +699,19 @@ if (digitalRead(27) == 0)
   Serial.println("m/s^2");
 
   Serial.println("");
-  anglex = (atan(Oaccel.x/sqrt(sq(Oaccel.y)+sq(Oaccel.z))) - initX)* 57.29; // final angle computaion in degrees x
-  angley = (atan(Oaccel.y/sqrt(sq(Oaccel.x)+sq(Oaccel.z))) - initY) * 57.29;// final angle computaion in degrees y
-  anglez = (atan(sqrt(sq(Oaccel.y)+sq(Oaccel.x))/Oaccel.z) - initZ) * 57.29;// final angle computaion in degrees z
-
-  
-    Serial.print("angle x: ");
-    Serial.println(anglex);
-    Serial.print("angle y: ");
-    Serial.println(angley);
-    Serial.print("angle z: ");
-    Serial.println(anglez);
-    Serial.println("");
+  char buffer[10];
+  heading_in_degree = (180*atan2(Omagn.y,Omagn.x)/PI);
+  if( heading_in_degree < 0) {
+    heading_in_degree = 360+heading_in_degree;
+  }
+  heading_in_degree = heading_in_degree - magini;
+  Serial.print("mag angle: ");
+  Serial.println(heading_in_degree);
+  dtostrf(heading_in_degree,2,2,buffer);
+  u8g2.clearBuffer();
+  u8g2.drawStr(3, 15, buffer); 
+  u8g2.sendBuffer(); 
+   
     readTime();
     count++;
     Serial.println();

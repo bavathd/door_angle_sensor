@@ -560,7 +560,7 @@ void dataTransfer()
 
 DFRobot_BMX160 bmx160;
 void setup() {
-  pinMode(39, INPUT_PULLUP);
+  pinMode(32, INPUT_PULLUP);
 
   pinMode(33, OUTPUT);
   digitalWrite(33, HIGH);
@@ -664,7 +664,7 @@ void setup() {
 void loop() {
 
   // check if the pushbutton is pressed. If it is, the buttonState is HIGH:
-  if (digitalRead(39) == 0)
+  if (digitalRead(32) == 0)
   {
     digitalWrite(33, HIGH);
     delay(1000);
